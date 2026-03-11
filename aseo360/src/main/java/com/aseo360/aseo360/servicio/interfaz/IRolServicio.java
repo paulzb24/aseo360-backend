@@ -6,7 +6,10 @@ import java.util.List;
 
 public interface IRolServicio {
     public List<Rol> listarRoles();
-    public Rol registrarRol(Rol rol);
+
+    public Rol registrarRol(Rol rol) throws Exception;
+
     public Rol buscarPorId(Long id) throws Exception;
+
     public void eliminarPorId(Long id) throws Exception;
 }

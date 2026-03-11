@@ -12,5 +12,6 @@ public class Proveedor {
     @Id
     private String ruc;
 
+    @Column(nullable = false, unique = true)
     private String nombre;
 }

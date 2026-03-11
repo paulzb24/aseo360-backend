@@ -22,27 +22,28 @@ public class Producto {
     @JoinColumn(name = "aroma_id", referencedColumnName = "idAroma")
     private Aroma aroma;
 
-    @ManyToOne
-    @JoinColumn(name = "proveedor_id", referencedColumnName = "ruc")
-    private Proveedor proveedor;
-
-    @ManyToOne
-    @JoinColumn(name = "sede_id", referencedColumnName = "idSede")
-    private Sede sede;
-
+    @Column(nullable = false)
     private String nombre;
 
     private String descripcion;
 
     private String imagen;
 
-    private Integer cantidad;
-
+    @Column(nullable = false)
     private BigDecimal precioCompra;
 
+    @Column(nullable = false)
     private BigDecimal precioVenta;
 
+    @Column(nullable = false)
+    private BigDecimal precioPorMayor;
+
+    @Column(nullable = false)
     private LocalDate fechaRegistro;
 
-    private String estado; //DISPONIBLE - NO DISPONIBLE
+    @Column(nullable = false)
+    private String estado;
+
+    private String peso;
+    private String presentacion;
 }

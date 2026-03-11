@@ -27,22 +27,23 @@ public class Cliente {
     @Column(nullable = false)
     private String fotoPerfil;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String correo;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 8)
     private String dni;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private String NumeroCelular;
+    @Column(nullable = false, unique = true)
+    private String numeroCelular;
 
     @Column(nullable = false)
     private String Direccion;
 
     private LocalDate fechaRegistro;
 
+    @Column(nullable = false)
     private String estado;
 }

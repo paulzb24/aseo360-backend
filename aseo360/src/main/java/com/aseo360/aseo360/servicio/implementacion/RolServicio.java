@@ -12,7 +12,7 @@ public class RolServicio implements IRolServicio {
     private final IRolRepositorio rolRepository;
 
     @Autowired
-    public RolServicio(IRolRepositorio rolRepository){
+    public RolServicio(IRolRepositorio rolRepository) {
         this.rolRepository = rolRepository;
     }
 
@@ -22,13 +22,17 @@ public class RolServicio implements IRolServicio {
     }
 
     @Override
-    public Rol registrarRol(Rol rol) {
+    public Rol registrarRol(Rol rol) throws Exception {
+        rol.setNombre(rol.getNombre().toUpperCase());
+        if (this.rolRepository.existsByNombre(rol.getNombre())) {
+            throw new Exception("Ya existe un rol con el nombre: " + rol.getNombre());
+        }
         return this.rolRepository.save(rol);
     }
 
     @Override
     public Rol buscarPorId(Long id) throws Exception {
-        return this.rolRepository.findById(id).orElseThrow(()->new Exception("Rol con id " + id + " no entontrado"));
+        return this.rolRepository.findById(id).orElseThrow(() -> new Exception("Rol con id " + id + " no entontrado"));
     }
 
     @Override

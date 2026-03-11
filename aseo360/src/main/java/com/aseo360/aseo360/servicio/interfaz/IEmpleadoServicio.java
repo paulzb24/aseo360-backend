@@ -8,6 +8,7 @@ import java.util.List;
 public interface IEmpleadoServicio {
     public List<Empleado> listarEmpleados();
     public Empleado registrarEmpleado(EmpleadoRegistroDTO empleadoRegistro) throws Exception;
+    public Empleado modificarEmpleado(EmpleadoRegistroDTO empleadoRegistroDTO) throws Exception;
     public Empleado buscarPorId(Long id) throws Exception;
     public void eliminarPorId(Long id);
 }

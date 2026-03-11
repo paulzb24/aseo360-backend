@@ -14,8 +14,9 @@ import java.util.List;
 public class ClienteServicio implements IClienteServicio {
     private final IClienteRepositorio clienteRepositorio;
     private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    public ClienteServicio(IClienteRepositorio clienteRepositorio, PasswordEncoder passwordEncoder){
+    public ClienteServicio(IClienteRepositorio clienteRepositorio, PasswordEncoder passwordEncoder) {
         this.clienteRepositorio = clienteRepositorio;
         this.passwordEncoder = passwordEncoder;
     }
@@ -28,8 +29,15 @@ public class ClienteServicio implements IClienteServicio {
     @Override
     public Cliente registrarCliente(ClienteRegistroDTO clienteRegistro) throws Exception {
         Cliente newCliente = new Cliente();
-        if (clienteRegistro.getPassword() == null || clienteRegistro.getPassword().isEmpty()){
-            throw new Exception("¡Ingrese una contraseña!");
+        if (this.clienteRepositorio.existsByCorreo(clienteRegistro.getCorreo())) {
+            throw new Exception("Ya existe un cliente con el correo: " + clienteRegistro.getCorreo());
+        }
+        if (this.clienteRepositorio.existsByDni(clienteRegistro.getDni())) {
+            throw new Exception("Ya existe un cliente con el DNI: " + clienteRegistro.getDni());
+        }
+        if (clienteRegistro.getNumeroCelular() != null
+                && this.clienteRepositorio.existsByNumeroCelular(clienteRegistro.getNumeroCelular())) {
+            throw new Exception("Ya existe un cliente con el numero de celular: " + clienteRegistro.getNumeroCelular());
         }
         newCliente.setNombreCompleto(clienteRegistro.getNombreCompleto());
         newCliente.setFotoPerfil(clienteRegistro.getFotoPerfil());
@@ -40,7 +48,7 @@ public class ClienteServicio implements IClienteServicio {
 
         newCliente.setPassword(this.passwordEncoder.encode(clienteRegistro.getPassword()));
         newCliente.setFechaRegistro(LocalDate.now());
-        newCliente.setEstado("PENDIENTE");
+        newCliente.setEstado("ACTIVO");
 
         return this.clienteRepositorio.save(newCliente);
     }
@@ -48,7 +56,7 @@ public class ClienteServicio implements IClienteServicio {
     @Override
     public Cliente buscarPorId(Long id) throws Exception {
         return this.clienteRepositorio.findById(id)
-                .orElseThrow(()-> new Exception("No se encontro cliente con id: " + id));
+                .orElseThrow(() -> new Exception("No se encontro cliente con id: " + id));
     }
 
     @Override

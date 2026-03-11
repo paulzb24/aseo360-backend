@@ -4,6 +4,7 @@ import com.aseo360.aseo360.modelo.Aroma;
 
 import java.util.List;
 
+
 public interface IAromaServicio {
     public List<Aroma> listarAromas()throws Exception;
     public Aroma registrarAroma(Aroma aroma)throws Exception;

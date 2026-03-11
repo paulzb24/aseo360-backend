@@ -8,34 +8,37 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/admin/roles")
+@RequestMapping("/api/roles")
 public class RolControlador {
     private final IRolServicio rolServicio;
 
     @Autowired
-    public RolControlador(IRolServicio rolServicio){
+    public RolControlador(IRolServicio rolServicio) {
         this.rolServicio = rolServicio;
     }
+
     @GetMapping
-    public ResponseEntity<?> listRoles(){
+    public ResponseEntity<?> listRoles() {
         return ResponseEntity.ok(this.rolServicio.listarRoles());
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerRol(@RequestBody Rol rol){
-        return ResponseEntity.ok(this.rolServicio.registrarRol(rol));
+    public ResponseEntity<?> registerRol(@RequestBody Rol rol) {
+        try {
+            return ResponseEntity.ok(this.rolServicio.registrarRol(rol));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteRol(@PathVariable Long id){
-        try{
+    public ResponseEntity<?> deleteRol(@PathVariable Long id) {
+        try {
             this.rolServicio.eliminarPorId(id);
             return ResponseEntity.ok("Eliminado correctamente");
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getMessage());
         }
     }
-
-
 
 }

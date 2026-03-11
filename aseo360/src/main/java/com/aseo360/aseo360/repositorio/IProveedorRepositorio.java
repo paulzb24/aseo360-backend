@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IProveedorRepositorio extends JpaRepository<Proveedor, String> {
+    boolean existsByNombre(String nombre);
+
+    boolean existsByNombreAndRucNot(String nombre, String ruc);
 }

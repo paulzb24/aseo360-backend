@@ -6,7 +6,10 @@ import java.util.List;
 
 public interface ISedeServicio {
     public List<Sede> listarSedes();
-    public Sede registrarSede(Sede sede);
+
+    public Sede registrarSede(Sede sede) throws Exception;
+
     public Sede buscarSedePorId(Long id) throws Exception;
+
     public void eliminarSedePorId(Long id);
 }

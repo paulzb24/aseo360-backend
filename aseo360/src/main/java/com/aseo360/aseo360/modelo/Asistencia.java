@@ -25,6 +25,8 @@ public class Asistencia {
     private LocalDate fecha;
     private Time horaEntrada;
     private Time horaSalida;
+
+    @Column(nullable = false, length = 100)
     private String estado;
     private String comentarios;
 }

@@ -13,7 +13,7 @@ public class AromaServicio implements IAromaServicio {
     private final IAromaRepositorio aromaRepositorio;
 
     @Autowired
-    public AromaServicio(IAromaRepositorio aromaRepositorio){
+    public AromaServicio(IAromaRepositorio aromaRepositorio) {
         this.aromaRepositorio = aromaRepositorio;
     }
 
@@ -24,15 +24,19 @@ public class AromaServicio implements IAromaServicio {
 
     @Override
     public Aroma registrarAroma(Aroma aroma) throws Exception {
-        if (aroma.getNombre() == null || aroma.getNombre().isEmpty()){
+        if (aroma.getNombre() == null || aroma.getNombre().isEmpty()) {
             throw new Exception("Error : El nombre del aroma es obligatorio");
+        }
+        if (this.aromaRepositorio.existsByNombre(aroma.getNombre())) {
+            throw new Exception("Ya existe un aroma con el nombre: " + aroma.getNombre());
         }
         return this.aromaRepositorio.save(aroma);
     }
 
     @Override
     public Aroma buscarAromaPorId(Long id) throws Exception {
-        return this.aromaRepositorio.findById(id).orElseThrow(()-> new Exception("Error : Aroma con ID: "+ id + "No encontrado"));
+        return this.aromaRepositorio.findById(id)
+                .orElseThrow(() -> new Exception("Error : Aroma con ID: " + id + "No encontrado"));
     }
 
     @Override

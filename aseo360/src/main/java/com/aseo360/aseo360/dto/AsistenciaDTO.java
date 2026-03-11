@@ -20,5 +20,5 @@ public class AsistenciaDTO {
     private Time horaEntrada;
     private Time horaSalida;
     private String estado;
-    private String Comentario;
+    private String comentario;
 }

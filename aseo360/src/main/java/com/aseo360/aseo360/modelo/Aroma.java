@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "aromas", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "nombre")
-})
+@Table(name = "aromas")
 public class Aroma {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idAroma;
+
+    @Column(unique = true, nullable = false, length = 75)
     private String nombre;
 }

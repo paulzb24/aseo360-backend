@@ -12,42 +12,71 @@ import com.aseo360.aseo360.servicio.interfaz.IEmpleadoServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired private AuthenticationManager authManager;
-    @Autowired private JwtUtils jwtUtils;
-    @Autowired private IEmpleadoRepositorio empleadoRepositorio;
-    @Autowired private IClienteRepositorio clienteRepositorio;
-    @Autowired private IClienteServicio clienteServicio;
-    @Autowired private IEmpleadoServicio empleadoServicio;
+    @Autowired
+    private AuthenticationManager authManager;
+    @Autowired
+    private JwtUtils jwtUtils;
+    @Autowired
+    private IEmpleadoRepositorio empleadoRepositorio;
+    @Autowired
+    private IClienteRepositorio clienteRepositorio;
+    @Autowired
+    private IClienteServicio clienteServicio;
+    @Autowired
+    private IEmpleadoServicio empleadoServicio;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
-        // Valida contra la base de datos usando tu UserDetailsService
-        authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getCorreo(), loginRequest.getPassword())
-        );
-        String token = jwtUtils.generateToken(loginRequest.getCorreo());
-        // Buscamos datos extras para el Frontend
-        var emp = empleadoRepositorio.findByCorreo(loginRequest.getCorreo());
-        if (emp.isPresent()) {
-            var e = emp.get();
-            return ResponseEntity.ok(new AuthResponse(token, e.getNombreCompleto(),e.getFotoPerfil(), e.getRol().getNombre(), "EMPLEADO"));
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) throws Exception {
+        // Verificar si el correo existe en el sistema
+        boolean existeEmpleado = empleadoRepositorio.findByCorreo(loginRequest.getCorreo()).isPresent();
+        boolean existeCliente = clienteRepositorio.findByCorreo(loginRequest.getCorreo()).isPresent();
+
+        if (!existeEmpleado && !existeCliente) {
+            throw new Exception("El correo no esta registrado");
         }
+
+        // Si el correo existe, validar la contrasena
+        try {
+            authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getCorreo(), loginRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            throw new Exception("La contraseña es incorrecta");
+        } catch (DisabledException e) {
+            throw new Exception("La cuenta se encuentra deshabilitada");
+        }
+
+        String token = jwtUtils.generateToken(loginRequest.getCorreo());
+
+        // Buscamos datos extras para el Frontend
+        if (existeEmpleado) {
+            var emp = empleadoRepositorio.findByCorreo(loginRequest.getCorreo()).get();
+            return ResponseEntity.ok(new AuthResponse(token, emp.getNombreCompleto(), emp.getFotoPerfil(),
+                    emp.getRol().getNombre(), "EMPLEADO"));
+        }
+
         var cust = clienteRepositorio.findByCorreo(loginRequest.getCorreo()).get();
-        return ResponseEntity.ok(new AuthResponse(token, cust.getNombreCompleto(),cust.getFotoPerfil(), "CLIENTE", "CLIENTE"));
+        return ResponseEntity
+                .ok(new AuthResponse(token, cust.getNombreCompleto(), cust.getFotoPerfil(), "CLIENTE", "CLIENTE"));
     }
+
     @PostMapping("/registrar/empleado")
-    public ResponseEntity<?> registrarEmpleado(@RequestBody EmpleadoRegistroDTO empleadoRegistro) throws Exception {
+    public ResponseEntity<?> registrarEmpleado(@Valid @RequestBody EmpleadoRegistroDTO empleadoRegistro)
+            throws Exception {
         return ResponseEntity.ok(this.empleadoServicio.registrarEmpleado(empleadoRegistro));
     }
+
     @PostMapping("/registrar/cliente")
-    public ResponseEntity<?> registrarCliente(@RequestBody ClienteRegistroDTO clienteRegistro) throws Exception {
+    public ResponseEntity<?> registrarCliente(@Valid @RequestBody ClienteRegistroDTO clienteRegistro) throws Exception {
         return ResponseEntity.ok(this.clienteServicio.registrarCliente(clienteRegistro));
     }
 }

@@ -12,53 +12,80 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/asistencia")
-public class AsistenciaController{
+@RequestMapping("/api/asistencia")
+public class AsistenciaControlador {
     private final IAsistenciaServicio asistenciaServicio;
+
     @Autowired
-    public AsistenciaController(IAsistenciaServicio asistenciaServicio){
+    public AsistenciaControlador(IAsistenciaServicio asistenciaServicio) {
         this.asistenciaServicio = asistenciaServicio;
     }
-    @GetMapping("/listar/empleado/{id}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'CAJERO', 'VENDEDOR', 'ALMACENERO')")
-    public ResponseEntity<?> listarAsistenciaPorEmpleado(@PathVariable Long id){
+
+    @GetMapping("/listar/mis-asistencias")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'VENDEDOR', 'ALMACENERO')")
+    public ResponseEntity<?> listarMisAsistencias(@AuthenticationPrincipal UserLogin userLogin) {
         try {
-            return ResponseEntity.ok(this.asistenciaServicio.listarAsistenciasPorEmpleado(id));
+            String correo = userLogin.getUsername();
+            return ResponseEntity.ok(this.asistenciaServicio.listarAsistenciasPorEmpleado(correo));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/listar/por-fecha")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> listarPorFecha(@RequestParam(required = false) String fecha) {
+        try {
+            java.time.LocalDate localDate = (fecha != null && !fecha.isEmpty())
+                    ? java.time.LocalDate.parse(fecha)
+                    : java.time.LocalDate.now();
+            return ResponseEntity.ok(this.asistenciaServicio.listarAsistenciasPorFecha(localDate));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getMessage());
         }
     }
 
     @PostMapping("/registrar")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'CAJERO', 'VENDEDOR', 'ALMACENERO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'VENDEDOR', 'ALMACENERO')")
     public ResponseEntity<?> registrarAsistencia(@AuthenticationPrincipal UserLogin userLogin) throws Exception {
-        try{
+        try {
             String correo = userLogin.getUsername();
-            if (!userLogin.isEnabled()){
+            if (!userLogin.isEnabled()) {
                 return ResponseEntity.status(403).body("Usuario no activo");
             }
             Asistencia asistencia = this.asistenciaServicio.registrarAsistencia(correo);
             return ResponseEntity.ok(asistencia);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(e.getMessage());
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/registrar/admin")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> registrarAsistenciaAdmin(@RequestBody AsistenciaDTO asistenciaDTO) {
+        try {
+            Asistencia asistencia = this.asistenciaServicio.registrarAsistenciaAdmin(asistenciaDTO);
+            return ResponseEntity.ok(asistencia);
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 
     @PutMapping("/registrar/salida/{idAsistencia}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'CAJERO', 'VENDEDOR', 'ALMACENERO')")
-    public ResponseEntity<?> registrarSalida(@PathVariable Long idAsistencia){
-        try{
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'VENDEDOR', 'ALMACENERO')")
+    public ResponseEntity<?> registrarSalida(@PathVariable Long idAsistencia) {
+        try {
             this.asistenciaServicio.registrarSalida(idAsistencia);
             return ResponseEntity.ok("Salida registrado con exito!");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(e.getMessage());
+            return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 
     @PutMapping("/modificar/asistencia")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
-    public ResponseEntity<?> modificarAsistencia(@RequestBody AsistenciaDTO asistenciaDTO){
-        try{
+    public ResponseEntity<?> modificarAsistencia(@RequestBody AsistenciaDTO asistenciaDTO) {
+        try {
             this.asistenciaServicio.modificarAsistencia(asistenciaDTO);
             return ResponseEntity.ok("Asistencia modificado exitosamente!");
         } catch (Exception e) {
@@ -68,7 +95,7 @@ public class AsistenciaController{
 
     @PutMapping("/modificar/comentario")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
-    public ResponseEntity<?> modificarComentario(@RequestBody AsistenciaDTO asistenciaDTO){
+    public ResponseEntity<?> modificarComentario(@RequestBody AsistenciaDTO asistenciaDTO) {
         try {
             this.asistenciaServicio.modificarComentario(asistenciaDTO);
             return ResponseEntity.ok("Comentario agregado");
@@ -79,7 +106,7 @@ public class AsistenciaController{
 
     @PutMapping("/modificar/estado")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
-    public ResponseEntity<?> modificarEstado(@RequestBody AsistenciaDTO asistenciaDTO){
+    public ResponseEntity<?> modificarEstado(@RequestBody AsistenciaDTO asistenciaDTO) {
         try {
             this.asistenciaServicio.modificarEstado(asistenciaDTO);
             return ResponseEntity.ok("Estado modificado");

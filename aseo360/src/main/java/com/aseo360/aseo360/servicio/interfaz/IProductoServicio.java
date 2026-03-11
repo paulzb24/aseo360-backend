@@ -4,13 +4,21 @@ import com.aseo360.aseo360.dto.ProductoRegistroDTO;
 import com.aseo360.aseo360.dto.ProductoResponseDTO;
 import com.aseo360.aseo360.modelo.Producto;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface IProductoServicio {
-    public List<ProductoResponseDTO> listarProductos() throws Exception;
-    public List<ProductoResponseDTO> listarProductosDisponibles() throws Exception;
+    public Page<ProductoResponseDTO> listarProductos(Pageable pageable) throws Exception;
+
+    public Page<ProductoResponseDTO> listarProductosDisponibles(Pageable pageable) throws Exception;
+
     public Producto registrarProducto(ProductoRegistroDTO productoRegistroDTO) throws Exception;
+
     public Producto modificarProducto(ProductoRegistroDTO productoRegistroDTO) throws Exception;
-    public Producto buscarPorId(Long id) throws Exception;
-    public void eliminarPorId(Long id) throws Exception;
+
+    public Producto buscarPorId(String id) throws Exception;
+
+    public void eliminarPorId(String id) throws Exception;
+
+    public Producto aumentarStock(String id, Integer cantidad) throws Exception;
 }
